@@ -1,0 +1,368 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart City Bus - Live Tracking & Navigation</title>
+    
+    <!-- Leaflet CSS -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
+    <!-- Font Awesome for icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
+    
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <!-- Header -->
+        <header class="app-header">
+            <div class="header-content">
+                <h1 class="app-title">
+                    <i class="fas fa-bus"></i>
+                    Smart City Bus
+                </h1>
+                <div class="header-controls">
+                    <button class="btn btn--sm theme-toggle" id="themeToggle">
+                        <i class="fas fa-moon"></i>
+                    </button>
+                    <div class="connection-status" id="connectionStatus">
+                        <i class="fas fa-wifi"></i>
+                        <span>Online</span>
+                    </div>
+                    <!-- Demo Controls (dev-only) -->
+                    <div class="demo-controls" id="demoControls">
+                        <button class="btn btn--sm btn--outline" id="pauseSimulation">
+                            <i class="fas fa-pause"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Navigation -->
+            <nav class="nav-tabs">
+                <button class="nav-tab active" data-view="dashboard">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </button>
+                <button class="nav-tab" data-view="tracking">
+                    <i class="fas fa-map"></i>
+                    <span>Tracking</span>
+                </button>
+                <button class="nav-tab" data-view="routes">
+                    <i class="fas fa-route"></i>
+                    <span>Routes</span>
+                </button>
+                <button class="nav-tab" data-view="tourism">
+                    <i class="fas fa-camera"></i>
+                    <span>Tourism</span>
+                </button>
+                <button class="nav-tab" data-view="profile">
+                    <i class="fas fa-user"></i>
+                    <span>Profile</span>
+                </button>
+            </nav>
+        </header>
+
+        <!-- Main Content -->
+        <main class="app-main">
+            <!-- Dashboard View -->
+            <div id="dashboard" class="view active">
+                <!-- Weather and Time Widget -->
+                <div class="widget-row">
+                    <div class="card weather-widget">
+                        <div class="card__body">
+                            <div class="weather-info">
+                                <div class="weather-icon" id="weatherIcon">
+                                    <i class="fas fa-sun"></i>
+                                </div>
+                                <div class="weather-details">
+                                    <div class="temperature" id="temperature">Loading...</div>
+                                    <div class="weather-desc" id="weatherDesc">Loading weather...</div>
+                                </div>
+                            </div>
+                            <div class="current-time" id="currentTime">12:00 AM</div>
+                        </div>
+                    </div>
+                    
+                    <div class="card quick-actions">
+                        <div class="card__body">
+                            <button class="btn btn--primary emergency-btn" id="emergencyBtn">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                Emergency SOS
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Route Selector -->
+                <div class="card">
+                    <div class="card__body">
+                        <label for="routeSelector" class="form-label">Select Route</label>
+                        <select id="routeSelector" class="form-control">
+                            <option value="">All Routes</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Live Map Preview -->
+                <div class="card map-preview">
+                    <div class="card__header">
+                        <h3>Live Bus Positions</h3>
+                        <div class="refresh-indicator" id="refreshIndicator">
+                            <i class="fas fa-sync"></i>
+                            <span>Updated 0s ago</span>
+                        </div>
+                    </div>
+                    <div class="card__body">
+                        <div id="dashboardMap" class="mini-map" style="height: 250px; position: relative;"></div>
+                    </div>
+                </div>
+
+                <!-- Nearby Stops -->
+                <div class="card">
+                    <div class="card__header">
+                        <h3>Nearby Stops</h3>
+                    </div>
+                    <div class="card__body">
+                        <div id="nearbyStops" class="stops-list"></div>
+                    </div>
+                </div>
+
+                <!-- Notifications Panel -->
+                <div class="card notifications-panel">
+                    <div class="card__header">
+                        <h3>Recent Notifications</h3>
+                    </div>
+                    <div class="card__body">
+                        <div id="notificationsList" class="notifications-list"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Bus Tracking View -->
+            <div id="tracking" class="view">
+                <div class="tracking-controls">
+                    <div class="card">
+                        <div class="card__body">
+                            <div class="flex justify-between items-center">
+                                <label for="trackingRouteFilter" class="form-label">Filter by Route:</label>
+                                <select id="trackingRouteFilter" class="form-control" style="width: auto;">
+                                    <option value="">All Routes</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card map-container">
+                    <div class="card__body" style="padding: 0;">
+                        <div id="trackingMap" style="height: 500px; position: relative;"></div>
+                    </div>
+                </div>
+
+                <!-- Bus Info Panel -->
+                <div id="busInfoPanel" class="card bus-info-panel hidden">
+                    <div class="card__header">
+                        <h3>Bus Information</h3>
+                        <button class="btn btn--sm btn--outline" id="closeBusInfo">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="card__body" id="busInfoContent">
+                        <!-- Dynamic content -->
+                    </div>
+                </div>
+            </div>
+
+            <!-- Routes & Schedules View -->
+            <div id="routes" class="view">
+                <div class="card search-card">
+                    <div class="card__body">
+                        <div class="form-group">
+                            <label for="routeSearch" class="form-label">Search Routes</label>
+                            <input type="text" id="routeSearch" class="form-control" placeholder="Enter origin or destination...">
+                        </div>
+                    </div>
+                </div>
+
+                <div id="routesList" class="routes-list"></div>
+            </div>
+
+            <!-- Tourism & POI Discovery View -->
+            <div id="tourism" class="view">
+                <div class="card filters-card">
+                    <div class="card__body">
+                        <div class="poi-filters">
+                            <button class="filter-btn active" data-type="">All</button>
+                            <button class="filter-btn" data-type="Tourist Attraction">Attractions</button>
+                            <button class="filter-btn" data-type="Shopping Mall">Shopping</button>
+                            <button class="filter-btn" data-type="Restaurant">Restaurants</button>
+                            <button class="filter-btn" data-type="Monument">Monuments</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div id="poisList" class="pois-list"></div>
+                
+                <!-- Geofencing Settings -->
+                <div class="card geofencing-settings">
+                    <div class="card__header">
+                        <h3>Attraction Alerts</h3>
+                    </div>
+                    <div class="card__body">
+                        <div class="form-group">
+                            <label for="geofenceRadius" class="form-label">Alert Radius (meters)</label>
+                            <input type="range" id="geofenceRadius" min="50" max="500" value="200" class="form-control">
+                            <span id="radiusValue">200m</span>
+                        </div>
+                        <div class="form-group">
+                            <label>
+                                <input type="checkbox" id="notificationsEnabled" checked>
+                                Enable attraction notifications
+                            </label>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- User Profile View -->
+            <div id="profile" class="view">
+                <!-- User Info Card -->
+                <div class="card user-info">
+                    <div class="card__header">
+                        <h3>Profile Information</h3>
+                    </div>
+                    <div class="card__body">
+                        <div class="profile-details">
+                            <div class="profile-avatar">
+                                <i class="fas fa-user-circle"></i>
+                            </div>
+                            <div class="profile-info">
+                                <h4 id="userName">Priya Sharma</h4>
+                                <p id="userPhone">+91-9876543100</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Verification Status -->
+                <div class="card verification-status">
+                    <div class="card__header">
+                        <h3>Verification Status</h3>
+                    </div>
+                    <div class="card__body">
+                        <div class="verification-item">
+                            <div class="verification-info">
+                                <i class="fas fa-id-card"></i>
+                                <span>Aadhaar Verification</span>
+                            </div>
+                            <div class="verification-status-badge" id="aadhaarStatus">
+                                <span class="status status--error">Not Verified</span>
+                            </div>
+                        </div>
+                        <div class="verification-item">
+                            <div class="verification-info">
+                                <i class="fas fa-camera"></i>
+                                <span>Face Verification</span>
+                            </div>
+                            <div class="verification-status-badge" id="faceStatus">
+                                <span class="status status--error">Not Verified</span>
+                            </div>
+                        </div>
+                        <div class="verification-actions">
+                            <button class="btn btn--primary" id="startVerification">Start Verification</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Emergency Contacts -->
+                <div class="card emergency-contacts">
+                    <div class="card__header">
+                        <h3>Emergency Contacts</h3>
+                        <button class="btn btn--sm btn--outline" id="addEmergencyContact">
+                            <i class="fas fa-plus"></i>
+                        </button>
+                    </div>
+                    <div class="card__body">
+                        <div id="emergencyContactsList" class="contacts-list"></div>
+                    </div>
+                </div>
+
+                <!-- Travel History -->
+                <div class="card travel-history">
+                    <div class="card__header">
+                        <h3>Frequent Routes</h3>
+                    </div>
+                    <div class="card__body">
+                        <div id="frequentRoutes" class="frequent-routes-list"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Emergency SOS Modal -->
+    <div id="emergencyModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Emergency SOS</h2>
+                <button class="modal-close" id="closeEmergencyModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="emergency-step" id="emergencyStep1">
+                    <h3>Emergency Call</h3>
+                    <p>This will open your phone dialer with emergency number 100.</p>
+                    <div class="verification-options">
+                        <a href="tel:100" class="btn btn--primary btn--full-width emergency-call-btn">
+                            <i class="fas fa-phone"></i>
+                            Call Emergency Services (100)
+                        </a>
+                        <button class="btn btn--secondary btn--full-width" id="copyEmergencyNumber">
+                            <i class="fas fa-copy"></i>
+                            Copy Number: 100
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Desktop Emergency Modal -->
+    <div id="desktopEmergencyModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Emergency SOS</h2>
+                <button class="modal-close" id="closeDesktopEmergencyModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="emergency-desktop-info">
+                    <h3>Emergency Call Confirmation</h3>
+                    <p>Emergency number: <strong>100</strong></p>
+                    <p>This is the emergency services number. On mobile devices, this would open your phone dialer.</p>
+                    <div class="emergency-actions">
+                        <a href="tel:100" class="btn btn--primary">
+                            <i class="fas fa-phone"></i>
+                            Call 100
+                        </a>
+                        <button class="btn btn--secondary" id="copyDesktopEmergencyNumber">
+                            <i class="fas fa-copy"></i>
+                            Copy Number
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
+    <script src="js/weather.js"></script>
+    <script src="js/busSimulation.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>
