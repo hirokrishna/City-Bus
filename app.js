@@ -1172,6 +1172,11 @@ class SmartCityBusApp {
         const modal = document.getElementById('loginModal');
         if (modal) {
             modal.classList.remove('hidden');
+            // Focus on first input
+            setTimeout(() => {
+                const nameInput = document.getElementById('loginName');
+                if (nameInput) nameInput.focus();
+            }, 100);
         }
     }
 

@@ -17,6 +17,11 @@ class WeatherService {
             return this.lastWeatherData;
         }
 
+        // If no API key configured, use fallback immediately
+        if (this.apiKey === 'YOUR_OPENWEATHER_API_KEY') {
+            return this.getFallbackWeather();
+        }
+
         try {
             // Try to get user location first
             const coords = await this.getUserLocation();
