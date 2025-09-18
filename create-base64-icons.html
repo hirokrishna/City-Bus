@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PWA Icon Generator</title>
+</head>
+<body>
+    <h2>Generating PWA Icons...</h2>
+    <div id="output"></div>
+    
+    <script>
+        const sizes = [72, 96, 128, 144, 152, 192, 384, 512];
+        const output = document.getElementById('output');
+        
+        sizes.forEach(size => {
+            const canvas = document.createElement('canvas');
+            canvas.width = size;
+            canvas.height = size;
+            const ctx = canvas.getContext('2d');
+            
+            // Blue background
+            ctx.fillStyle = '#2563eb';
+            ctx.fillRect(0, 0, size, size);
+            
+            // White bus shape
+            ctx.fillStyle = '#ffffff';
+            
+            // Bus body
+            const busWidth = size * 0.6;
+            const busHeight = size * 0.35;
+            const busX = (size - busWidth) / 2;
+            const busY = (size - busHeight) / 2;
+            
+            ctx.fillRect(busX, busY, busWidth, busHeight);
+            
+            // Bus windows
+            ctx.fillStyle = '#2563eb';
+            const windowWidth = busWidth * 0.15;
+            const windowHeight = busHeight * 0.4;
+            const windowY = busY + busHeight * 0.2;
+            
+            for (let i = 0; i < 3; i++) {
+                const windowX = busX + busWidth * 0.15 + i * busWidth * 0.25;
+                ctx.fillRect(windowX, windowY, windowWidth, windowHeight);
+            }
+            
+            // Bus wheels
+            ctx.fillStyle = '#333333';
+            const wheelRadius = size * 0.05;
+            const wheelY = busY + busHeight + wheelRadius * 0.5;
+            
+            ctx.beginPath();
+            ctx.arc(busX + busWidth * 0.25, wheelY, wheelRadius, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            ctx.beginPath();
+            ctx.arc(busX + busWidth * 0.75, wheelY, wheelRadius, 0, 2 * Math.PI);
+            ctx.fill();
+            
+            // Convert to blob and create download link
+            canvas.toBlob(blob => {
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = `icon-${size}x${size}.png`;
+                link.textContent = `Download ${size}x${size} icon`;
+                link.style.display = 'block';
+                link.style.margin = '5px 0';
+                
+                output.appendChild(link);
+                
+                // Auto-click to download
+                link.click();
+            }, 'image/png');
+        });
+        
+        output.innerHTML += '<p><strong>All icons generated! Check your downloads folder.</strong></p>';
+    </script>
+</body>
+</html>

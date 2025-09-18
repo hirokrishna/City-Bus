@@ -10,6 +10,7 @@ A professional, deployable static web application for city bus tracking with rea
 - **Emergency SOS**: Mobile-optimized emergency dialer with tel:100 integration
 - **Interactive Maps**: Leaflet-based mapping with route visualization and geofencing
 - **Responsive Design**: Mobile-first design that works on all devices
+- **Progressive Web App**: Installable on mobile devices with offline functionality
 
 ### Enhanced Features
 - **Bus Movement Simulation**: Realistic bus movement along predefined routes
@@ -60,6 +61,24 @@ A professional, deployable static web application for city bus tracking with rea
 4. **Access the application**
    - Open your browser and navigate to `http://localhost:8000`
    - The app will automatically start with simulated bus movement
+
+### PWA Installation
+
+**On Mobile Devices:**
+1. Open the app in Chrome/Safari on your mobile device
+2. Tap the browser menu (⋮ or share button)
+3. Select "Add to Home Screen" or "Install App"
+4. The app will be installed and accessible from your home screen
+
+**On Desktop:**
+1. Open the app in Chrome/Edge
+2. Look for the install icon (⊕) in the address bar
+3. Click "Install" to add the app to your desktop
+
+**Generate Icons:**
+- Open `create-base64-icons.html` in your browser to generate PWA icons
+- Icons will be automatically downloaded to your downloads folder
+- Move the generated PNG files to the `icons/` directory
 
 ### Environment Variables
 

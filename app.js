@@ -1297,4 +1297,11 @@ document.addEventListener('DOMContentLoaded', () => {
     
     // Make app globally available for onclick handlers
     window.app = app;
+    
+    // Register service worker for PWA
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js')
+            .then(() => console.log('Service Worker registered'))
+            .catch(err => console.log('Service Worker registration failed'));
+    }
 });

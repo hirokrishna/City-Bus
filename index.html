@@ -5,6 +5,19 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart City Bus - Live Tracking & Navigation</title>
     
+    <!-- PWA Meta Tags -->
+    <meta name="theme-color" content="#2563eb">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="Smart Bus">
+    <link rel="manifest" href="manifest.json">
+    
+    <!-- Favicon and PWA Icons -->
+    <link rel="icon" type="image/png" href="icons/Logo.png">
+    <link rel="apple-touch-icon" href="icons/Logo.png">
+    <link rel="icon" type="image/png" sizes="192x192" href="icons/Logo.png">
+    <link rel="icon" type="image/png" sizes="512x512" href="icons/Logo.png">
+    
     <!-- Leaflet CSS -->
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
     
@@ -29,12 +42,6 @@
                     <div class="connection-status" id="connectionStatus">
                         <i class="fas fa-wifi"></i>
                         <span>Online</span>
-                    </div>
-                    <!-- Demo Controls (dev-only) -->
-                    <div class="demo-controls" id="demoControls">
-                        <button class="btn btn--sm btn--outline" id="pauseSimulation">
-                            <i class="fas fa-pause"></i>
-                        </button>
                     </div>
                 </div>
             </div>
