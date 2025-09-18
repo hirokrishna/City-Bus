@@ -115,16 +115,16 @@ class SmartCityBusApp {
                 }
             ],
             "user": {
-                "id": "user123",
-                "name": "Priya Sharma", 
-                "phone": "+91-9876543100",
+                "id": null,
+                "name": null, 
+                "phone": null,
+                "isLoggedIn": false,
                 "aadhaarVerified": false,
                 "faceVerified": false,
                 "emergencyContacts": [
-                    {"name": "Raj Sharma (Father)", "phone": "+91-9876543101", "relation": "Family"},
                     {"name": "Emergency Services", "phone": "112", "relation": "Police"}
                 ],
-                "frequentRoutes": ["R001", "R002"],
+                "frequentRoutes": [],
                 "geofenceRadius": 200,
                 "notificationsEnabled": true
             },
@@ -175,6 +175,7 @@ class SmartCityBusApp {
 
         // Initialize the application
         this.init();
+        this.checkLoginStatus();
     }
 
     async init() {
@@ -300,6 +301,48 @@ class SmartCityBusApp {
         if (closeBusInfo) {
             closeBusInfo.addEventListener('click', () => {
                 this.hideBusInfo();
+            });
+        }
+
+        // Login form
+        const loginForm = document.getElementById('loginForm');
+        if (loginForm) {
+            loginForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.handleLogin();
+            });
+        }
+
+        // Logout button
+        const logoutBtn = document.getElementById('logoutBtn');
+        if (logoutBtn) {
+            logoutBtn.addEventListener('click', () => {
+                this.handleLogout();
+            });
+        }
+
+        // Add emergency contact
+        const addEmergencyContact = document.getElementById('addEmergencyContact');
+        if (addEmergencyContact) {
+            addEmergencyContact.addEventListener('click', () => {
+                this.showAddContactModal();
+            });
+        }
+
+        // Add contact form
+        const addContactForm = document.getElementById('addContactForm');
+        if (addContactForm) {
+            addContactForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                this.handleAddContact();
+            });
+        }
+
+        // Close add contact modal
+        const closeAddContactModal = document.getElementById('closeAddContactModal');
+        if (closeAddContactModal) {
+            closeAddContactModal.addEventListener('click', () => {
+                this.hideModal('addContactModal');
             });
         }
     }
@@ -823,9 +866,17 @@ class SmartCityBusApp {
     renderProfile() {
         const userNameEl = document.getElementById('userName');
         const userPhoneEl = document.getElementById('userPhone');
+        const logoutBtn = document.getElementById('logoutBtn');
         
-        if (userNameEl) userNameEl.textContent = this.data.user.name;
-        if (userPhoneEl) userPhoneEl.textContent = this.data.user.phone;
+        if (userNameEl) {
+            userNameEl.textContent = this.data.user.isLoggedIn ? this.data.user.name : 'Guest User';
+        }
+        if (userPhoneEl) {
+            userPhoneEl.textContent = this.data.user.isLoggedIn ? this.data.user.phone : 'Not logged in';
+        }
+        if (logoutBtn) {
+            logoutBtn.style.display = this.data.user.isLoggedIn ? 'inline-flex' : 'none';
+        }
 
         // Update verification status
         const aadhaarStatus = document.getElementById('aadhaarStatus');
@@ -864,8 +915,8 @@ class SmartCityBusApp {
                     <div class="contact-name">${contact.name}</div>
                     <div class="contact-phone">${contact.phone}</div>
                 </div>
-                <button class="btn btn--sm btn--outline" onclick="app.editContact('${contact.phone}')">
-                    <i class="fas fa-edit"></i>
+                <button class="btn btn--sm btn--outline" onclick="app.removeContact('${contact.phone}')" ${contact.phone === '112' ? 'disabled title="Cannot remove emergency services"' : ''}>
+                    <i class="fas fa-trash"></i>
                 </button>
             `;
             container.appendChild(contactElement);
@@ -1097,6 +1148,140 @@ class SmartCityBusApp {
 
     editContact(phone) {
         this.showNotification(`Edit contact functionality would open here for ${phone}`, 'info');
+    }
+
+    checkLoginStatus() {
+        const userData = localStorage.getItem('smartCityBusUser');
+        if (userData) {
+            const user = JSON.parse(userData);
+            this.data.user = { 
+                ...this.data.user, 
+                ...user, 
+                isLoggedIn: true,
+                emergencyContacts: user.emergencyContacts || [
+                    {"name": "Emergency Services", "phone": "112", "relation": "Police"}
+                ]
+            };
+            this.renderProfile();
+        } else {
+            this.showLoginModal();
+        }
+    }
+
+    showLoginModal() {
+        const modal = document.getElementById('loginModal');
+        if (modal) {
+            modal.classList.remove('hidden');
+        }
+    }
+
+    handleLogin() {
+        const name = document.getElementById('loginName').value.trim();
+        const phone = document.getElementById('loginPhone').value.trim();
+        
+        if (name && phone) {
+            const userData = {
+                id: 'user_' + Date.now(),
+                name: name,
+                phone: phone,
+                isLoggedIn: true,
+                emergencyContacts: [
+                    {"name": "Emergency Services", "phone": "112", "relation": "Police"}
+                ],
+                frequentRoutes: [],
+                geofenceRadius: 200,
+                notificationsEnabled: true
+            };
+            
+            localStorage.setItem('smartCityBusUser', JSON.stringify(userData));
+            this.data.user = { ...this.data.user, ...userData };
+            
+            this.hideModal('loginModal');
+            this.renderProfile();
+            this.showNotification(`Welcome ${name}!`, 'success');
+        }
+    }
+
+    handleLogout() {
+        localStorage.removeItem('smartCityBusUser');
+        this.data.user = {
+            id: null,
+            name: null,
+            phone: null,
+            isLoggedIn: false,
+            aadhaarVerified: false,
+            faceVerified: false,
+            emergencyContacts: [
+                {"name": "Emergency Services", "phone": "112", "relation": "Police"}
+            ],
+            frequentRoutes: [],
+            geofenceRadius: 200,
+            notificationsEnabled: true
+        };
+        this.renderProfile();
+        this.showLoginModal();
+        this.showNotification('Logged out successfully', 'info');
+    }
+
+    showAddContactModal() {
+        if (!this.data.user.isLoggedIn) {
+            this.showNotification('Please login to add emergency contacts', 'error');
+            return;
+        }
+        const modal = document.getElementById('addContactModal');
+        if (modal) {
+            modal.classList.remove('hidden');
+            // Clear form
+            document.getElementById('addContactForm').reset();
+        }
+    }
+
+    handleAddContact() {
+        const name = document.getElementById('contactName').value.trim();
+        const phone = document.getElementById('contactPhone').value.trim();
+        const relation = document.getElementById('contactRelation').value;
+        
+        if (name && phone && relation) {
+            const newContact = {
+                name: name,
+                phone: phone,
+                relation: relation
+            };
+            
+            this.data.user.emergencyContacts.push(newContact);
+            this.saveUserData();
+            this.renderEmergencyContacts();
+            this.hideModal('addContactModal');
+            this.showNotification('Emergency contact added successfully', 'success');
+        }
+    }
+
+    removeContact(phone) {
+        if (phone === '112') {
+            this.showNotification('Cannot remove emergency services contact', 'error');
+            return;
+        }
+        
+        this.data.user.emergencyContacts = this.data.user.emergencyContacts.filter(
+            contact => contact.phone !== phone
+        );
+        this.saveUserData();
+        this.renderEmergencyContacts();
+        this.showNotification('Emergency contact removed', 'info');
+    }
+
+    saveUserData() {
+        if (this.data.user.isLoggedIn) {
+            localStorage.setItem('smartCityBusUser', JSON.stringify({
+                id: this.data.user.id,
+                name: this.data.user.name,
+                phone: this.data.user.phone,
+                emergencyContacts: this.data.user.emergencyContacts,
+                frequentRoutes: this.data.user.frequentRoutes,
+                geofenceRadius: this.data.user.geofenceRadius,
+                notificationsEnabled: this.data.user.notificationsEnabled
+            }));
+        }
     }
 }
 

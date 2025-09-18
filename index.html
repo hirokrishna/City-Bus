@@ -30,12 +30,6 @@
                         <i class="fas fa-wifi"></i>
                         <span>Online</span>
                     </div>
-                    <!-- Demo Controls (dev-only) -->
-                    <div class="demo-controls" id="demoControls">
-                        <button class="btn btn--sm btn--outline" id="pauseSimulation">
-                            <i class="fas fa-pause"></i>
-                        </button>
-                    </div>
                 </div>
             </div>
             
@@ -239,8 +233,12 @@
                                 <i class="fas fa-user-circle"></i>
                             </div>
                             <div class="profile-info">
-                                <h4 id="userName">Priya Sharma</h4>
-                                <p id="userPhone">+91-9876543100</p>
+                                <h4 id="userName">Guest User</h4>
+                                <p id="userPhone">Not logged in</p>
+                                <button class="btn btn--sm btn--outline" id="logoutBtn" style="display: none;">
+                                    <i class="fas fa-sign-out-alt"></i>
+                                    Logout
+                                </button>
                             </div>
                         </div>
                     </div>
@@ -282,6 +280,7 @@
                         <h3>Emergency Contacts</h3>
                         <button class="btn btn--sm btn--outline" id="addEmergencyContact">
                             <i class="fas fa-plus"></i>
+                            Add Contact
                         </button>
                     </div>
                     <div class="card__body">
@@ -355,6 +354,72 @@
                         </button>
                     </div>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Login Modal -->
+    <div id="loginModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Login to Smart City Bus</h2>
+            </div>
+            <div class="modal-body">
+                <form id="loginForm">
+                    <div class="form-group">
+                        <label for="loginName" class="form-label">Full Name</label>
+                        <input type="text" id="loginName" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="loginPhone" class="form-label">Phone Number</label>
+                        <input type="tel" id="loginPhone" class="form-control" required>
+                    </div>
+                    <button type="submit" class="btn btn--primary btn--full-width">
+                        <i class="fas fa-sign-in-alt"></i>
+                        Login
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add Emergency Contact Modal -->
+    <div id="addContactModal" class="modal hidden">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Add Emergency Contact</h2>
+                <button class="modal-close" id="closeAddContactModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="addContactForm">
+                    <div class="form-group">
+                        <label for="contactName" class="form-label">Contact Name</label>
+                        <input type="text" id="contactName" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="contactPhone" class="form-label">Phone Number</label>
+                        <input type="tel" id="contactPhone" class="form-control" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="contactRelation" class="form-label">Relation</label>
+                        <select id="contactRelation" class="form-control" required>
+                            <option value="">Select Relation</option>
+                            <option value="Family">Family</option>
+                            <option value="Friend">Friend</option>
+                            <option value="Colleague">Colleague</option>
+                            <option value="Doctor">Doctor</option>
+                            <option value="Other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <button type="submit" class="btn btn--primary btn--full-width">
+                            <i class="fas fa-plus"></i>
+                            Add Contact
+                        </button>
+                    </div>
+                </form>
             </div>
         </div>
     </div>
