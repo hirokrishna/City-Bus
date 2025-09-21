@@ -2,6 +2,7 @@ const CACHE_NAME = 'smart-bus-v1';
 const urlsToCache = [
   '/',
   '/index.html',
+  '/landing.html',
   '/style.css',
   '/app.js',
   '/js/weather.js',
